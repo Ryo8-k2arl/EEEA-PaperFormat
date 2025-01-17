@@ -1,0 +1,8 @@
+### Ignore Files ###
+
+*.aux
+*.synctex.gz
+*.log
+*.toc
+*.bbl
+*.blg
