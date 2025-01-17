@@ -4,13 +4,30 @@
 %%
 %%
 
-\LoadClass[a4paper, book, openany, titlepage]{jlreq}
 \NeedsTeXFormat{LaTeX2e}[2024/01/01]
 \ProvidesClass{mnblab}[2024/01/10 mnblab]
 
+
+
+
+
+\ProcessOptions\relax
+
+
+\LoadClass[a4paper, book, titlepage, openany, 10pt]{jlreq}
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \RequirePackage{plautopatch}
+\usepackage{xparse}
 \RequirePackage{expl3}
 \RequirePackage{geometry}
+\RequirePackage{bookmark}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
 % \RequirePackage{luatexja}
 % \RequirePackage[%
 % no-math,    % 数式環境に適用しない
@@ -30,25 +47,6 @@
 }
 
 \def\jsc@magscale{1}
-\DeclareOption{8pt} {\def\jsc@magscale{0.833}}% 1.2^(-1)
-\DeclareOption{9pt} {\def\jsc@magscale{0.913}}% 1.2^(-0.5}
-\DeclareOption{10pt}{\def\jsc@magscale{1}}
-\DeclareOption{11pt}{\def\jsc@magscale{1.095}}% 1.2^0.5
-\DeclareOption{12pt}{\def\jsc@magscale{1.200}}
-\DeclareOption{14pt}{\def\jsc@magscale{1.440}}
-\DeclareOption{17pt}{\def\jsc@magscale{1.728}}
-\DeclareOption{20pt}{\def\jsc@magscale{2}}
-\DeclareOption{21pt}{\def\jsc@magscale{2.074}}
-\DeclareOption{25pt}{\def\jsc@magscale{2.488}}
-\DeclareOption{30pt}{\def\jsc@magscale{2.986}}
-\DeclareOption{36pt}{\def\jsc@magscale{3.583}}
-\DeclareOption{43pt}{\def\jsc@magscale{4.300}}
-\DeclareOption{12Q} {\def\jsc@magscale{0.923}}% 1pt*12Q/13Q
-\DeclareOption{14Q} {\def\jsc@magscale{1.077}}% 1pt*14Q/13Q
-\DeclareOption{10ptj}{\def\jsc@magscale{1.085}}% 1pt*10bp/13Q
-\DeclareOption{10.5ptj}{\def\jsc@magscale{1.139}}
-\DeclareOption{11ptj}{\def\jsc@magscale{1.194}}
-\DeclareOption{12ptj}{\def\jsc@magscale{1.302}}
 
 \def\@dottedtocline#1#2#3#4#5{%
   \ifnum #1>\c@tocdepth \else
@@ -78,7 +76,6 @@
 \jsc@mmm=\jsc@magscale mm
 \newif\if@english
 \@englishfalse
-\DeclareOption{english}{\@englishtrue}
 \newcommand{\prechaptername}{\if@english Chapter~\else 第\fi}
 \newcommand{\postchaptername}{\if@english\else 章\fi}
 \newcommand{\@chapapp}{\prechaptername}
@@ -111,57 +108,56 @@
       \parfillskip-\rightskip
       \leavevmode\headfont
       % \if@english\setlength\@lnumwidth{5.5em}\else\setlength\@lnumwidth{4.683\zw}\fi
-      \setlength\@lnumwidth{\jsc@tocl@width}\advance\@lnumwidth 2.683\zw
+      \setlength\@lnumwidth{\jsc@tocl@width}\advance\@lnumwidth 2.5\zw
       \advance\leftskip\@lnumwidth \hskip-\leftskip
-      #1\nobreak\hfil\nobreak\hbox to\@pnumwidth{\hss#2}\par
+      {\large#1\nobreak\hfil\nobreak\hbox to\@pnumwidth{\hss#2}}\par\vspace*{0.5\baselineskip}
       \penalty\@highpenalty
     \endgroup
   \fi}
- % \newcommand*{\l@section}{\@dottedtocline{1}{1\zw}{3.683\zw}}
 \renewcommand*{\l@section}{%
-          \@tempdima\jsc@tocl@width \advance\@tempdima -1\zw
-          \@dottedtocline{1}{\@tempdima}{3.683\zw}}
+  \@tempdima\jsc@tocl@width \advance\@tempdima 2.5\zw
+  \@dottedtocline{1}{\@tempdima}{2\zw}}
 \renewcommand*{\l@subsection}{%
-          \@tempdima\jsc@tocl@width \advance\@tempdima 2.683\zw
-          \@dottedtocline{2}{\@tempdima}{3.5\zw}}
+  \@tempdima\jsc@tocl@width \advance\@tempdima 4.5\zw
+  \@dottedtocline{2}{\@tempdima}{3\zw}}
 \renewcommand*{\l@subsubsection}{%
-          \@tempdima\jsc@tocl@width \advance\@tempdima 6.183\zw
-          \@dottedtocline{3}{\@tempdima}{4.5\zw}}
-          \newdimen\@lnumwidth
-          \def\numberline#1{\hb@xt@\@lnumwidth{#1\hfil}\hspace{0pt}}
-          \def\jsTocLine{\leaders\hbox{%
-            $\m@th \mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
-          \def\@dottedtocline#1#2#3#4#5{\ifnum #1>\c@tocdepth \else
-            \vskip \z@ \@plus.2\jsc@mpt
-            {\leftskip #2\relax \rightskip \@tocrmarg \parfillskip -\rightskip
-              \parindent #2\relax\@afterindenttrue
-             \interlinepenalty\@M
-             \leavevmode
-             \@lnumwidth #3\relax
-             \advance\leftskip \@lnumwidth \null\nobreak\hskip -\leftskip
-              {#4}\nobreak
-              \jsTocLine \nobreak\hb@xt@\@pnumwidth{%
-                   \hfil\normalfont \normalcolor #5}\par}\fi}
-          \renewcommand{\listoffigures}{%
-            \if@twocolumn\@restonecoltrue\onecolumn
-            \else\@restonecolfalse\fi
-            \chapter*{\listfigurename}%
-            \@mkboth{\listfigurename}{}%
-            \@starttoc{lof}%
-            \if@restonecol\twocolumn\fi
-          }
-          \renewcommand*{\l@figure}{\@dottedtocline{1}{1\zw}{3.683\zw}}
-          \renewcommand{\listoftables}{%
-            \if@twocolumn\@restonecoltrue\onecolumn
-            \else\@restonecolfalse\fi
-            \chapter*{\listtablename}%
-            \@mkboth{\listtablename}{}%
-            \@starttoc{lot}%
-            \if@restonecol\twocolumn\fi
-          }
+  \@tempdima\jsc@tocl@width \advance\@tempdima 7.5\zw
+  \@dottedtocline{3}{\@tempdima}{4\zw}}
+\newdimen\@lnumwidth
+\def\numberline#1{\hb@xt@\@lnumwidth{#1\hfil}\hspace{0pt}}
+\def\jsTocLine{\leaders\hbox{%
+$\m@th \mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+\def\@dottedtocline#1#2#3#4#5{\ifnum #1>\c@tocdepth \else
+\vskip \z@ \@plus.2\jsc@mpt
+{\leftskip #2\relax \rightskip \@tocrmarg \parfillskip -\rightskip
+    \parindent #2\relax\@afterindenttrue
+    \interlinepenalty\@M
+    \leavevmode
+    \@lnumwidth #3\relax
+    \advance\leftskip \@lnumwidth \null\nobreak\hskip -\leftskip
+    {#4}\nobreak
+    \jsTocLine \nobreak\hb@xt@\@pnumwidth{%
+        \hfil\normalfont \normalcolor #5}\par}\fi}
+\renewcommand{\listoffigures}{%
+\if@twocolumn\@restonecoltrue\onecolumn
+\else\@restonecolfalse\fi
+\chapter*{\listfigurename}%
+\@mkboth{\listfigurename}{}%
+\@starttoc{lof}%
+\if@restonecol\twocolumn\fi
+}
+\renewcommand*{\l@figure}{\@dottedtocline{1}{1\zw}{3.683\zw}}
+\renewcommand{\listoftables}{%
+\if@twocolumn\@restonecoltrue\onecolumn
+\else\@restonecolfalse\fi
+\chapter*{\listtablename}%
+\@mkboth{\listtablename}{}%
+\@starttoc{lot}%
+\if@restonecol\twocolumn\fi
+}
+
 \ExplSyntaxOn
-% 目次のドットを小さくする
-% 小さいドットのスタイル
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -266,8 +262,8 @@
         \str_case:NnF \l_mnblab_degree_tl
               {
                 { bachelor } { 埼玉大学~工学部~電気電子物理工学科 }
-                { master   } { 埼玉大学~大学院理工学研究科\\数理電子情報専攻~電気電子物理工学プログラム }
-                { doctor   } { 埼玉大学~大学院理工学研究科\\数理電子情報専攻~電気電子物理工学プログラム }
+                { master   } { 埼玉大学~大学院理工学研究科\\数理電子情報専攻~電気電子物理工学~PG }
+                { doctor   } { 埼玉大学~大学院理工学研究科\\数理電子情報専攻~電気電子物理工学~PG }
               }
               { \msg_fatal:nn { mnblab }{ invalid-degree }}
     }
@@ -318,6 +314,53 @@
         }
         \end{center}
     }
+
+\cs_set_eq:NN \old_chapter \chapter
+\RenewDocumentCommand{ \chapter }{ s m }
+    {
+        \bool_if:NTF #1
+        { \old_chapter*{#2} \addcontentsline{toc}{chapter}{#2} }
+        { \old_chapter{#2} }
+}
+\RenewDocumentCommand{\appendix}{}{%
+  \par
+  \jlreq@appendix@precode
+  \jlreq@appendix@counter
+  \jlreq@appendix@heading
+  \jlreq@appendix@postcode
+  \pagestyle{mnblab_appendix}
+}
+
+% 元の thebibliography 環境を呼び出せるように保存
+% \cs_new_eq:NN \original_thebibliography: \thebibliography
+% \cs_new_eq:NN \original_endthebibliography: \endthebibliography
+%. 文献，そのまま
+\renewenvironment{thebibliography}[1]{%
+  \jlreq@oldfontcommand@enable
+  \chapter*{参考文献}
+  \@mkboth{参考文献}{参考文献}%
+  \list{\@biblabel{\@arabic\c@enumiv}}%
+      {\settowidth\labelwidth{\@biblabel{#1}}%
+      \labelsep=1\jlreq@zw
+      \leftmargin\labelwidth
+      \advance\leftmargin\labelsep
+      \itemindent=0pt
+      \@openbib@code
+      \usecounter{enumiv}%
+      \let\p@enumiv\@empty
+      \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+  \sloppy
+  \clubpenalty4000
+  \@clubpenalty\clubpenalty
+  \widowpenalty4000%
+  \sfcode`\.\@m
+}{%
+  \def\@noitemerr{\@latex@warning{Empty~`thebibliography'~environment}}%
+  \endlist
+  \jlreq@oldfontcommand@disable
+}
+\let\@openbib@code\@empty
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % 概要を格納するトークンリストを定義
@@ -325,14 +368,62 @@
 
 % 概要環境の定義
 \NewDocumentEnvironment{abstract}{}{
-        \frontmatter\chapter*{概要}
+        \frontmatter
+        \pagestyle{mnblab_front}
+        \chapter*{概要}
         \group_begin:
     }
     {
         \tableofcontents
-        \mainmatter
         \group_end:
+        \mainmatter
     }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% excute %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\hypersetup{
+    pdftitle={\l_mnblab_title_tl},
+    pdfauthor={\l_mnblab_author_tl}
+}
+
+\renewcommand{\chaptermark}[1]{{\markboth{\prechaptername \thechapter \postchaptername\hspace{5pt}#1}{}}}
+\renewcommand{\footrulewidth}{0.4pt}
+\setlength{\headwidth}{\textwidth}
+\fancypagestyle{mnblab_main}{
+    \fancyhf{}
+    \fancyhead[OL]{\l_mnblab_title_tl}
+    \fancyhead[OR]{}
+    \fancyhead[EL]{}
+    \fancyhead[ER]{\leftmark}
+    \setlength{\headheight}{17pt}
+    \fancyfoot[C]{\textit{Saitama University}}
+    \fancyfoot[OL]{\thepage}
+    \fancyfoot[ER]{\thepage}
+}
+\fancypagestyle{mnblab_front}{
+    \fancyhf{}
+    \fancyhead[OL]{\l_mnblab_title_tl}
+    \fancyhead[OR]{}
+    \fancyhead[EL]{}
+    \fancyhead[ER]{\leftmark}
+    \setlength{\headheight}{17pt}
+    \fancyfoot[C]{\textit{Saitama University}}
+    \fancyfoot[OL]{\thepage}
+    \fancyfoot[ER]{\thepage}
+}
+\fancypagestyle{mnblab_appendix}{
+    \fancyhf{}
+    \fancyhead[OL]{\l_mnblab_title_tl}
+    \fancyhead[OR]{}
+    \fancyhead[EL]{}
+    \fancyhead[ER]{}
+    \setlength{\headheight}{17pt}
+    \fancyfoot[C]{\textit{Saitama University}}
+    \fancyfoot[OL]{\thepage}
+    \fancyfoot[ER]{\thepage}
+}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% test %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
