@@ -4,22 +4,20 @@
 %%
 %%
 
-\LoadClass[a4paper, report, titlepage]{jlreq}
+\LoadClass[a4paper, book, openany, titlepage]{jlreq}
 \NeedsTeXFormat{LaTeX2e}[2024/01/01]
 \ProvidesClass{mnblab}[2024/01/10 mnblab]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \RequirePackage{expl3}
 \RequirePackage{geometry}
-\RequirePackage{luatexja}
-\RequirePackage[%
-no-math,    % 数式環境に適用しない
-deluxe,     %セリフ体の適用（太字や細字も使えるようになる）
-expert,     %縦書き・横書きに合わせた仮名を使う
+% \RequirePackage{luatexja}
+% \RequirePackage[%
+% no-math,    % 数式環境に適用しない
+% deluxe,     %セリフ体の適用（太字や細字も使えるようになる）
+% expert,     %縦書き・横書きに合わせた仮名を使う
 % haranoaji   %原ノ味フォント適用
-]{luatexja-preset}
-
-
+% ]{luatexja-preset}
 
 
 %% 余白のサイズ設定
@@ -31,8 +29,140 @@ expert,     %縦書き・横書きに合わせた仮名を使う
     includefoot,    %
 }
 
+\def\jsc@magscale{1}
+\DeclareOption{8pt} {\def\jsc@magscale{0.833}}% 1.2^(-1)
+\DeclareOption{9pt} {\def\jsc@magscale{0.913}}% 1.2^(-0.5}
+\DeclareOption{10pt}{\def\jsc@magscale{1}}
+\DeclareOption{11pt}{\def\jsc@magscale{1.095}}% 1.2^0.5
+\DeclareOption{12pt}{\def\jsc@magscale{1.200}}
+\DeclareOption{14pt}{\def\jsc@magscale{1.440}}
+\DeclareOption{17pt}{\def\jsc@magscale{1.728}}
+\DeclareOption{20pt}{\def\jsc@magscale{2}}
+\DeclareOption{21pt}{\def\jsc@magscale{2.074}}
+\DeclareOption{25pt}{\def\jsc@magscale{2.488}}
+\DeclareOption{30pt}{\def\jsc@magscale{2.986}}
+\DeclareOption{36pt}{\def\jsc@magscale{3.583}}
+\DeclareOption{43pt}{\def\jsc@magscale{4.300}}
+\DeclareOption{12Q} {\def\jsc@magscale{0.923}}% 1pt*12Q/13Q
+\DeclareOption{14Q} {\def\jsc@magscale{1.077}}% 1pt*14Q/13Q
+\DeclareOption{10ptj}{\def\jsc@magscale{1.085}}% 1pt*10bp/13Q
+\DeclareOption{10.5ptj}{\def\jsc@magscale{1.139}}
+\DeclareOption{11ptj}{\def\jsc@magscale{1.194}}
+\DeclareOption{12ptj}{\def\jsc@magscale{1.302}}
 
+\def\@dottedtocline#1#2#3#4#5{%
+  \ifnum #1>\c@tocdepth \else
+    \jlreq@set@top@contents{#1}%
+    \vskip\toclineskip
+    {\leftskip #2\relax \rightskip \@tocrmarg \parfillskip -\rightskip
+    \parindent #2\relax\@afterindenttrue
+    \interlinepenalty\@M
+    \leavevmode
+    \@lnumwidth #3\relax
+    \@tempcnta=#1\relax
+    \advance\@tempcnta by -\jlreq@top@contents
+    \@tempdima=1\jlreq@mol
+    \multiply \@tempdima by \@tempcnta
+    \advance\leftskip \@lnumwidth \hbox{}\hskip -\leftskip
+    \advance\leftskip\@tempdima
+    {#4}\nobreak
+    \leaders\hbox{$\m@th\mkern \@dotsep mu$\null\inhibitglue .\inhibitglue\null$\m@th\mkern \@dotsep mu$}%
+    \hfill\nobreak
+    \hb@xt@\@pnumwidth{\hss\normalfont\normalcolor #5}%
+    \par}%
+  \fi
+}
+\newdimen\jsc@mpt
+\newdimen\jsc@mmm
+\jsc@mpt=\jsc@magscale\p@
+\jsc@mmm=\jsc@magscale mm
+\newif\if@english
+\@englishfalse
+\DeclareOption{english}{\@englishtrue}
+\newcommand{\prechaptername}{\if@english Chapter~\else 第\fi}
+\newcommand{\postchaptername}{\if@english\else 章\fi}
+\newcommand{\@chapapp}{\prechaptername}
+\newcommand{\@chappos}{\postchaptername}
+\newcommand{\headfont}{\gtfamily\sffamily}
+\newdimen\jsc@tocl@width
+\newcommand{\appendixname}{\if@english \else 付録\fi}
+\renewcommand{\tableofcontents}{%
+  \settowidth\jsc@tocl@width{\headfont\prechaptername\postchaptername}%
+  \settowidth\@tempdima{\headfont\appendixname}%
+  \ifdim\jsc@tocl@width<\@tempdima \setlength\jsc@tocl@width{\@tempdima}\fi
+  \ifdim\jsc@tocl@width<2\zw \divide\jsc@tocl@width by 2 \advance\jsc@tocl@width 1\zw\fi
+  \if@twocolumn
+    \@restonecoltrue\onecolumn
+  \else
+    \@restonecolfalse
+  \fi
+  \chapter*{\contentsname}%
+  \@mkboth{\contentsname}{}%
+  \@starttoc{toc}%
+  \if@restonecol\twocolumn\fi
+}
+\renewcommand*{\l@chapter}[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \addvspace{1.0em \@plus\jsc@mpt}
+    \begingroup
+      \parindent\z@
+      \rightskip\@tocrmarg
+      \parfillskip-\rightskip
+      \leavevmode\headfont
+      % \if@english\setlength\@lnumwidth{5.5em}\else\setlength\@lnumwidth{4.683\zw}\fi
+      \setlength\@lnumwidth{\jsc@tocl@width}\advance\@lnumwidth 2.683\zw
+      \advance\leftskip\@lnumwidth \hskip-\leftskip
+      #1\nobreak\hfil\nobreak\hbox to\@pnumwidth{\hss#2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+ % \newcommand*{\l@section}{\@dottedtocline{1}{1\zw}{3.683\zw}}
+\renewcommand*{\l@section}{%
+          \@tempdima\jsc@tocl@width \advance\@tempdima -1\zw
+          \@dottedtocline{1}{\@tempdima}{3.683\zw}}
+\renewcommand*{\l@subsection}{%
+          \@tempdima\jsc@tocl@width \advance\@tempdima 2.683\zw
+          \@dottedtocline{2}{\@tempdima}{3.5\zw}}
+\renewcommand*{\l@subsubsection}{%
+          \@tempdima\jsc@tocl@width \advance\@tempdima 6.183\zw
+          \@dottedtocline{3}{\@tempdima}{4.5\zw}}
+          \newdimen\@lnumwidth
+          \def\numberline#1{\hb@xt@\@lnumwidth{#1\hfil}\hspace{0pt}}
+          \def\jsTocLine{\leaders\hbox{%
+            $\m@th \mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+          \def\@dottedtocline#1#2#3#4#5{\ifnum #1>\c@tocdepth \else
+            \vskip \z@ \@plus.2\jsc@mpt
+            {\leftskip #2\relax \rightskip \@tocrmarg \parfillskip -\rightskip
+              \parindent #2\relax\@afterindenttrue
+             \interlinepenalty\@M
+             \leavevmode
+             \@lnumwidth #3\relax
+             \advance\leftskip \@lnumwidth \null\nobreak\hskip -\leftskip
+              {#4}\nobreak
+              \jsTocLine \nobreak\hb@xt@\@pnumwidth{%
+                   \hfil\normalfont \normalcolor #5}\par}\fi}
+          \renewcommand{\listoffigures}{%
+            \if@twocolumn\@restonecoltrue\onecolumn
+            \else\@restonecolfalse\fi
+            \chapter*{\listfigurename}%
+            \@mkboth{\listfigurename}{}%
+            \@starttoc{lof}%
+            \if@restonecol\twocolumn\fi
+          }
+          \renewcommand*{\l@figure}{\@dottedtocline{1}{1\zw}{3.683\zw}}
+          \renewcommand{\listoftables}{%
+            \if@twocolumn\@restonecoltrue\onecolumn
+            \else\@restonecolfalse\fi
+            \chapter*{\listtablename}%
+            \@mkboth{\listtablename}{}%
+            \@starttoc{lot}%
+            \if@restonecol\twocolumn\fi
+          }
 \ExplSyntaxOn
+% 目次のドットを小さくする
+% 小さいドットのスタイル
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -187,10 +317,22 @@ expert,     %縦書き・横書きに合わせた仮名を使う
             \vspace{20bp}
         }
         \end{center}
-        \restoregeometry % 余白設定戻し
     }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% 概要を格納するトークンリストを定義
+\tl_new:N \l_mnblab_abstract_content_tl
+
+% 概要環境の定義
+\NewDocumentEnvironment{abstract}{}{
+        \frontmatter\chapter*{概要}
+        \group_begin:
+    }
+    {
+        \tableofcontents
+        \mainmatter
+        \group_end:
+    }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% test %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
